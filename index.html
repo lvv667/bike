@@ -51,4 +51,169 @@
     input:checked + .slider:before { transform: translateX(20px); }
 
     /* 底部導覽列 */
-    .
+    .nav-bar { position: fixed; bottom: 0; left: 0; right: 0; height: 60px; background: var(--card-bg); display: flex; justify-content: space-around; align-items: center; border-top: 1px solid rgba(255,255,255,0.05); }
+    .nav-item { color: var(--text-dim); font-size: 0.75rem; display: flex; flex-direction: column; align-items: center; gap: 4px; text-decoration: none; cursor: pointer; }
+    .nav-item.active { color: var(--accent); }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <div class="logo"><i class="fa-solid fa-bicycle"></i> RideOS</div>
+    <div id="gps-status" style="font-size:0.8rem; color:var(--text-dim);"><i class="fa-solid fa-location-dot"></i> GPS 待命</div>
+  </div>
+
+  <!-- 車錶主頁 -->
+  <div id="tab-dashboard" class="panel active">
+    <div class="main-display">
+      <div class="speed-val" id="speed">0.0</div>
+      <div class="speed-unit">km/h · 即時速度</div>
+    </div>
+
+    <div class="control-btns">
+      <button class="btn btn-start" id="startBtn"><i class="fa-solid fa-play"></i> 開始騎乘</button>
+    </div>
+
+    <div class="section-title">
+      <span>感測器狀態</span>
+    </div>
+
+    <div class="sensor-grid" id="sensorContainer">
+      <div class="sensor-card" id="card-cadence" onclick="connectSensor('cadence')">
+        <div class="sensor-name"><i class="fa-solid fa-rotate-right"></i> 踏頻器</div>
+        <div class="sensor-val" id="val-cadence">-- <span style="font-size:0.8rem">rpm</span></div>
+        <div class="sensor-status" id="status-cadence">點擊配對藍牙</div>
+      </div>
+
+      <div class="sensor-card" id="card-hr" onclick="connectSensor('hr')">
+        <div class="sensor-name"><i class="fa-solid fa-heart-pulse"></i> 心率帶</div>
+        <div class="sensor-val" id="val-hr">-- <span style="font-size:0.8rem">bpm</span></div>
+        <div class="sensor-status" id="status-hr">點擊配對藍牙</div>
+      </div>
+
+      <div class="sensor-card" id="card-power" onclick="connectSensor('power')">
+        <div class="sensor-name"><i class="fa-solid fa-bolt"></i> 功率計</div>
+        <div class="sensor-val" id="val-power">-- <span style="font-size:0.8rem">W</span></div>
+        <div class="sensor-status" id="status-power">點擊配對藍牙</div>
+      </div>
+
+      <div class="sensor-card" id="card-speed" onclick="connectSensor('speed')">
+        <div class="sensor-name"><i class="fa-solid fa-gauge-high"></i> 速度感測器</div>
+        <div class="sensor-val" id="val-speed">-- <span style="font-size:0.8rem">km/h</span></div>
+        <div class="sensor-status" id="status-speed">點擊配對藍牙</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 設定頁面（感測器自由開關） -->
+  <div id="tab-settings" class="panel">
+    <div class="section-title">感測器顯示設定</div>
+    <p style="color:var(--text-dim); font-size:0.85rem; padding: 0 0 15px;">關閉不需要的感測器，可精簡主畫面卡片。</p>
+
+    <div class="setting-item">
+      <span><i class="fa-solid fa-rotate-right"></i> 踏頻器</span>
+      <label class="switch">
+        <input type="checkbox" id="toggle-cadence" checked onchange="updateSensorVisibility()">
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <div class="setting-item">
+      <span><i class="fa-solid fa-heart-pulse"></i> 心率帶</span>
+      <label class="switch">
+        <input type="checkbox" id="toggle-hr" checked onchange="updateSensorVisibility()">
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <div class="setting-item">
+      <span><i class="fa-solid fa-bolt"></i> 功率計</span>
+      <label class="switch">
+        <input type="checkbox" id="toggle-power" checked onchange="updateSensorVisibility()">
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <div class="setting-item">
+      <span><i class="fa-solid fa-gauge-high"></i> 速度感測器</span>
+      <label class="switch">
+        <input type="checkbox" id="toggle-speed" checked onchange="updateSensorVisibility()">
+        <span class="slider"></span>
+      </label>
+    </div>
+  </div>
+
+  <!-- 底部導覽列 -->
+  <div class="nav-bar">
+    <a class="nav-item active" id="nav-dashboard" onclick="switchTab('dashboard')"><i class="fa-solid fa-gauge"></i>車錶</a>
+    <a class="nav-item" id="nav-settings" onclick="switchTab('settings')"><i class="fa-solid fa-gear"></i>設定</a>
+  </div>
+
+  <script>
+    function switchTab(tabName) {
+      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      document.getElementById('tab-' + tabName).classList.add('active');
+      document.getElementById('nav-' + tabName).classList.add('active');
+    }
+
+    function updateSensorVisibility() {
+      const sensors = ['cadence', 'hr', 'power', 'speed'];
+      sensors.forEach(s => {
+        const toggle = document.getElementById(`toggle-${s}`);
+        if (toggle) {
+          const isChecked = toggle.checked;
+          const card = document.getElementById(`card-${s}`);
+          if (card) card.style.display = isChecked ? 'block' : 'none';
+          localStorage.setItem(`show_sensor_${s}`, isChecked);
+        }
+      });
+    }
+
+    function loadSensorPreferences() {
+      const sensors = ['cadence', 'hr', 'power', 'speed'];
+      sensors.forEach(s => {
+        const saved = localStorage.getItem(`show_sensor_${s}`);
+        if (saved !== null) {
+          const isChecked = saved === 'true';
+          const toggle = document.getElementById(`toggle-${s}`);
+          if (toggle) toggle.checked = isChecked;
+        }
+      });
+      updateSensorVisibility();
+    }
+
+    async function connectSensor(type) {
+      const services = {
+        cadence: 'cycling_speed_and_cadence',
+        speed: 'cycling_speed_and_cadence',
+        hr: 'heart_rate',
+        power: 'cycling_power'
+      };
+
+      try {
+        const statusEl = document.getElementById(`status-${type}`);
+        if(statusEl) statusEl.innerText = '搜尋連線中...';
+        
+        const device = await navigator.bluetooth.requestDevice({
+          filters: [{ services: [services[type]] }]
+        });
+        await device.gatt.connect();
+        
+        if(statusEl) statusEl.innerText = '已成功連線';
+        const card = document.getElementById(`card-${type}`);
+        if(card) card.classList.add('active');
+        alert(`${type.toUpperCase()} 感測器連線成功！`);
+      } catch (err) {
+        const statusEl = document.getElementById(`status-${type}`);
+        if(statusEl) statusEl.innerText = '連線失敗或取消';
+        alert('藍牙連線失敗：' + err.message);
+      }
+    }
+
+    window.onload = () => {
+      loadSensorPreferences();
+    };
+  </script>
+</body>
+</html>
