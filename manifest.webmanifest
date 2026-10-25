@@ -1,0 +1,9 @@
+{
+  "name": "RideOS 自行車車錶",
+  "short_name": "RideOS",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#07111e",
+  "theme_color": "#07111e",
+  "icons": []
+}
