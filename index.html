@@ -21,25 +21,31 @@
     .header { padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.05); }
     .logo { font-size: 1.2rem; font-weight: bold; color: var(--accent); display: flex; align-items: center; gap: 8px; }
     
-    .main-display { padding: 20px; text-align: center; background: linear-gradient(180deg, rgba(0,210,255,0.05) 0%, rgba(0,0,0,0) 100%); }
-    .speed-val { font-size: 4.5rem; font-weight: 800; line-height: 1; letter-spacing: -2px; }
-    .speed-unit { color: var(--text-dim); font-size: 1rem; margin-top: 5px; }
+    .main-display { padding: 15px 20px; text-align: center; background: linear-gradient(180deg, rgba(0,210,255,0.05) 0%, rgba(0,0,0,0) 100%); }
+    .speed-val { font-size: 4.2rem; font-weight: 800; line-height: 1; letter-spacing: -2px; }
+    .speed-unit { color: var(--text-dim); font-size: 0.9rem; margin-top: 5px; }
 
-    .control-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 0 20px 20px; }
-    .btn { border: none; border-radius: 12px; padding: 14px; font-size: 1rem; font-weight: bold; color: white; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
-    .btn-start { background: #0084ff; grid-column: span 2; }
-    .btn-stop { background: var(--danger); }
-    .btn-pause { background: #334155; }
+    .sub-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 0 15px 15px; }
+    .stat-card { background: var(--card-bg); border-radius: 10px; padding: 10px 6px; text-align: center; border: 1px solid rgba(255,255,255,0.05); }
+    .stat-label { font-size: 0.7rem; color: var(--text-dim); margin-bottom: 3px; }
+    .stat-val { font-size: 1.1rem; font-weight: bold; }
 
-    .section-title { font-size: 1.1rem; padding: 0 20px 10px; color: var(--text-dim); display: flex; justify-content: space-between; align-items: center; }
-    .sensor-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 0 20px; }
-    .sensor-card { background: var(--card-bg); border-radius: 12px; padding: 15px; border: 1px solid rgba(255,255,255,0.05); cursor: pointer; }
+    .control-btns { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; padding: 0 15px 15px; }
+    .btn { border: none; border-radius: 12px; padding: 12px 8px; font-size: 0.9rem; font-weight: bold; color: white; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 6px; }
+    .btn-start { background: #0084ff; grid-column: span 3; }
+    .btn-stop { background: var(--danger); display: none; grid-column: span 2; }
+    .btn-pause { background: #334155; display: none; }
+    .btn-lap { background: #0ea5e9; display: none; }
+
+    .section-title { font-size: 1.0rem; padding: 0 20px 8px; color: var(--text-dim); display: flex; justify-content: space-between; align-items: center; }
+    .sensor-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 0 15px; }
+    .sensor-card { background: var(--card-bg); border-radius: 12px; padding: 12px; border: 1px solid rgba(255,255,255,0.05); cursor: pointer; }
     .sensor-card.active { border-color: var(--accent); }
-    .sensor-name { font-size: 0.9rem; color: var(--text-dim); margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
-    .sensor-val { font-size: 1.4rem; font-weight: bold; }
-    .sensor-status { font-size: 0.75rem; color: var(--text-dim); margin-top: 4px; }
+    .sensor-name { font-size: 0.85rem; color: var(--text-dim); margin-bottom: 4px; display: flex; align-items: center; gap: 6px; }
+    .sensor-val { font-size: 1.2rem; font-weight: bold; }
+    .sensor-status { font-size: 0.7rem; color: var(--text-dim); margin-top: 2px; }
 
-    /* 設定選單面板 */
+    /* 設定面板 */
     .panel { display: none; padding: 20px; }
     .panel.active { display: block; }
     .setting-item { background: var(--card-bg); padding: 15px; border-radius: 10px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
@@ -51,7 +57,7 @@
     input:checked + .slider:before { transform: translateX(20px); }
 
     /* 底部導覽列 */
-    .nav-bar { position: fixed; bottom: 0; left: 0; right: 0; height: 60px; background: var(--card-bg); display: flex; justify-content: space-around; align-items: center; border-top: 1px solid rgba(255,255,255,0.05); }
+    .nav-bar { position: fixed; bottom: 0; left: 0; right: 0; height: 60px; background: var(--card-bg); display: flex; justify-content: space-around; align-items: center; border-top: 1px solid rgba(255,255,255,0.05); z-index: 100; }
     .nav-item { color: var(--text-dim); font-size: 0.75rem; display: flex; flex-direction: column; align-items: center; gap: 4px; text-decoration: none; cursor: pointer; }
     .nav-item.active { color: var(--accent); }
   </style>
@@ -70,8 +76,38 @@
       <div class="speed-unit">km/h · 即時速度</div>
     </div>
 
+    <div class="sub-stats">
+      <div class="stat-card">
+        <div class="stat-label">平均速度</div>
+        <div class="stat-val" id="avg-speed">0.0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">騎乘時間</div>
+        <div class="stat-val" id="ride-time">00:00</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">總距離</div>
+        <div class="stat-val" id="distance">0.00</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">總爬升</div>
+        <div class="stat-val" id="elevation">0 <span style="font-size:0.6rem">m</span></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">即時坡度</div>
+        <div class="stat-val" id="gradient">0%</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">計圈數</div>
+        <div class="stat-val" id="lap-count">0</div>
+      </div>
+    </div>
+
     <div class="control-btns">
-      <button class="btn btn-start" id="startBtn"><i class="fa-solid fa-play"></i> 開始騎乘</button>
+      <button class="btn btn-start" id="startBtn" onclick="startRide()"><i class="fa-solid fa-play"></i> 開始騎乘</button>
+      <button class="btn btn-pause" id="pauseBtn" onclick="pauseRide()"><i class="fa-solid fa-pause"></i> 暫停</button>
+      <button class="btn btn-lap" id="lapBtn" onclick="recordLap()"><i class="fa-solid fa-flag"></i> 計圈</button>
+      <button class="btn btn-stop" id="stopBtn" onclick="finishRide()"><i class="fa-solid fa-stop"></i> 結束並儲存 GPX</button>
     </div>
 
     <div class="section-title">
@@ -108,7 +144,7 @@
   <!-- 設定頁面（感測器自由開關） -->
   <div id="tab-settings" class="panel">
     <div class="section-title">感測器顯示設定</div>
-    <p style="color:var(--text-dim); font-size:0.85rem; padding: 0 0 15px;">關閉不需要的感測器，可精簡主畫面卡片。</p>
+    <p style="color:var(--text-dim); font-size:0.85rem; padding: 0 0 15px;">自由勾選要顯示或隱藏的感測器卡片：</p>
 
     <div class="setting-item">
       <span><i class="fa-solid fa-rotate-right"></i> 踏頻器</span>
@@ -150,6 +186,18 @@
   </div>
 
   <script>
+    let running = false;
+    let watchId = null;
+    let startTime = 0;
+    let elapsedTime = 0;
+    let timerInterval = null;
+    let totalDistance = 0;
+    let lastCoords = null;
+    let totalElevationGain = 0;
+    let lastAltitude = null;
+    let trackPoints = [];
+    let lapCount = 0;
+
     function switchTab(tabName) {
       document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
       document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
@@ -182,6 +230,151 @@
       });
       updateSensorVisibility();
     }
+
+    function startRide() {
+      running = true;
+      startTime = Date.now() - elapsedTime;
+      document.getElementById('startBtn').style.display = 'none';
+      document.getElementById('pauseBtn').style.display = 'block';
+      document.getElementById('lapBtn').style.display = 'block';
+      document.getElementById('stopBtn').style.display = 'block';
+      
+      timerInterval = setInterval(updateTimer, 1000);
+      
+      if (navigator.geolocation) {
+        watchId = navigator.geolocation.watchPosition(onPosition, onError, {
+          enableHighAccuracy: true, maximumAge: 0, timeout: 5000
+        });
+        document.getElementById('gps-status').innerHTML = '<i class="fa-solid fa-location-dot" style="color:var(--success)"></i> GPS 連線中';
+      }
+    }
+
+    function pauseRide() {
+      running = false;
+      clearInterval(timerInterval);
+      if (watchId) navigator.geolocation.clearWatch(watchId);
+      document.getElementById('pauseBtn').innerHTML = '<i class="fa-solid fa-play"></i> 繼續';
+      document.getElementById('pauseBtn').onclick = resumeRide;
+    }
+
+    function resumeRide() {
+      running = true;
+      startTime = Date.now() - elapsedTime;
+      timerInterval = setInterval(updateTimer, 1000);
+      document.getElementById('pauseBtn').innerHTML = '<i class="fa-solid fa-pause"></i> 暫停';
+      document.getElementById('pauseBtn').onclick = pauseRide;
+      if (navigator.geolocation) {
+        watchId = navigator.geolocation.watchPosition(onPosition, onError, { enableHighAccuracy: true });
+      }
+    }
+
+    function recordLap() {
+      lapCount++;
+      document.getElementById('lap-count').innerText = lapCount;
+      alert(`已記錄第 ${lapCount} 圈！`);
+    }
+
+    function finishRide() {
+      running = false;
+      clearInterval(timerInterval);
+      if (watchId) navigator.geolocation.clearWatch(watchId);
+      
+      // 生成 GPX 檔案並自動下載
+      exportGPX();
+      alert('騎乘已結束，GPX 軌跡檔已下載！');
+      location.reload();
+    }
+
+    function exportGPX() {
+      let gpx = `<?xml version="1.0" encoding="UTF-8"?>\n`;
+      gpx += `<gpx version="1.1" creator="RideOS - https://lvv667.github.io/bike/">\n`;
+      gpx += `  <trk>\n    <name>RideOS Workout ${new Date().toLocaleString()}</name>\n    <trkseg>\n`;
+      trackPoints.forEach(pt => {
+        gpx += `      <trkpt lat="${pt.lat}" lon="${pt.lon}">\n`;
+        if (pt.ele !== null) gpx += `        <ele>${pt.ele}</ele>\n`;
+        gpx += `        <time>${pt.time}</time>\n`;
+        gpx += `      </trkpt>\n`;
+      });
+      gpx += `    </trkseg>\n  </trk>\n</gpx>`;
+
+      let blob = new Blob([gpx], { type: 'application/gpx+xml' });
+      let url = URL.createObjectURL(blob);
+      let a = document.createElement('a');
+      a.href = url;
+      a.download = `RideOS_${new Date().toISOString().slice(0,10)}.gpx`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+
+    function updateTimer() {
+      elapsedTime = Date.now() - startTime;
+      let totalSec = Math.floor(elapsedTime / 1000);
+      let m = Math.floor(totalSec / 60);
+      let s = totalSec % 60;
+      document.getElementById('ride-time').innerText = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    }
+
+    function onPosition(pos) {
+      if (!running) return;
+      let lat = pos.coords.latitude;
+      let lon = pos.coords.longitude;
+      let alt = pos.coords.altitude;
+      let spd = pos.coords.speed ? pos.coords.speed * 3.6 : 0; // m/s 轉 km/h
+      
+      document.getElementById('speed').innerText = spd.toFixed(1);
+
+      // 紀錄軌跡點供 GPX 使用
+      trackPoints.push({
+        lat: lat,
+        lon: lon,
+        ele: alt !== null ? alt : 0,
+        time: new Date().toISOString()
+      });
+      
+      if (lastCoords) {
+        let dist = getDistanceFromLatLonInKm(lastCoords.latitude, lastCoords.longitude, lat, lon);
+        totalDistance += dist;
+        document.getElementById('distance').innerText = totalDistance.toFixed(2);
+        
+        let hours = (elapsedTime / 1000) / 3600;
+        if (hours > 0) {
+          let avg = totalDistance / hours;
+          document.getElementById('avg-speed').innerText = avg.toFixed(1);
+        }
+
+        // 爬升與坡度計算
+        if (alt !== null && lastAltitude !== null) {
+          let altDiff = alt - lastAltitude;
+          if (altDiff > 0) {
+            totalElevationGain += altDiff;
+            document.getElementById('elevation').innerText = Math.round(totalElevationGain);
+          }
+          let distMeters = dist * 1000;
+          if (distMeters > 2) { // 避免雜訊
+            let gradient = (altDiff / distMeters) * 100;
+            document.getElementById('gradient').innerText = gradient.toFixed(1) + '%';
+          }
+        }
+        if (alt !== null) lastAltitude = alt;
+      }
+      lastCoords = pos.coords;
+    }
+
+    function onError(err) {
+      document.getElementById('gps-status').innerHTML = '<i class="fa-solid fa-triangle-exclamation" style="color:var(--danger)"></i> GPS 訊號弱';
+    }
+
+    function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
+      let R = 6371;
+      let dLat = deg2rad(lat2-lat1);
+      let dLon = deg2rad(lon2-lon1);
+      let a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * Math.sin(dLon/2) * Math.sin(dLon/2);
+      let c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+      return R * c;
+    }
+
+    function deg2rad(deg) { return deg * (Math.PI/180); }
 
     async function connectSensor(type) {
       const services = {
